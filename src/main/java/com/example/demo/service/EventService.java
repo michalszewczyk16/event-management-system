@@ -1,61 +1,50 @@
 package com.example.demo.service;
 
-import com.example.demo.exception.DomainException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.entity.Event;
+import com.example.demo.repository.EventRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-@Service // Ta adnotacja rejestruje klasę w kontenerze IoC (Dependency Injection)
+@Service
 public class EventService {
 
-    private final List<Event> events = new ArrayList<>();
-    private long currentId = 1;
+    private final EventRepository eventRepository;
 
-    public List<Event> getAllEvents() {
-        return events;
-    }
-
-    public Event getEventById(Long id) {
-        return events.stream()
-                .filter(e -> e.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Wydarzenie o ID " + id + " nie istnieje."));
+    public EventService(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
     }
 
     public Event createEvent(Event event) {
-        // REGUŁA BIZNESOWA 1: Nie można stworzyć wydarzenia dla więcej niż 10 000 osób (np. ze względów bezpieczeństwa).
+        // Walidacja biznesowa
         if (event.getMaxParticipants() > 10000) {
-            throw new DomainException("Maksymalna liczba uczestników to 10 000 ze względów bezpieczeństwa.");
+            throw new IllegalArgumentException("Maksymalna liczba uczestników to 10 000.");
         }
-
-        event.setId(currentId++);
-        events.add(event);
-        return event;
+        return eventRepository.save(event);
     }
 
-    public Event updateEvent(Long id, Event updatedEvent) {
-        Event existingEvent = getEventById(id);
+    public Page<Event> getAllEvents(Pageable pageable) {
+        return eventRepository.findByDeletedFalse(pageable);
+    }
 
-        existingEvent.setName(updatedEvent.getName());
-        existingEvent.setDateTime(updatedEvent.getDateTime());
-        existingEvent.setMaxParticipants(updatedEvent.getMaxParticipants());
+    public Event getEventById(Long id) {
+        return eventRepository.findById(id)
+                .filter(event -> !event.isDeleted())
+                .orElseThrow(() -> new ResourceNotFoundException("Wydarzenie nie istnieje."));
+    }
 
-        return existingEvent;
+    public Event updateEvent(Long id, Event eventDetails) {
+        Event event = getEventById(id);
+        event.setName(eventDetails.getName());
+        event.setDateTime(eventDetails.getDateTime());
+        event.setMaxParticipants(eventDetails.getMaxParticipants());
+        return eventRepository.save(event);
     }
 
     public void deleteEvent(Long id) {
-        Event existingEvent = getEventById(id);
-
-        // REGUŁA BIZNESOWA 2: Nie można usunąć wydarzenia, jeśli do jego rozpoczęcia zostało mniej niż 24 godziny.
-        if (existingEvent.getDateTime().isBefore(LocalDateTime.now().plusHours(24))) {
-            throw new DomainException("Nie można anulować wydarzenia na mniej niż 24 godziny przed rozpoczęciem!");
-        }
-
-        events.remove(existingEvent);
+        Event event = getEventById(id);
+        event.setDeleted(true);
+        eventRepository.save(event);
     }
 }
