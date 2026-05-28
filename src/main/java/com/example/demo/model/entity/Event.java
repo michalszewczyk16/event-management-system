@@ -1,27 +1,30 @@
 package com.example.demo.model.entity;
 
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "events")
 public class Event {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Nazwa wydarzenia nie może być pusta")
+    @Column(nullable = false)
     private String name;
 
-    @Future(message = "Data wydarzenia musi być w przyszłości")
+    @Column(nullable = false)
     private LocalDateTime dateTime;
 
-    @Min(value = 1, message = "Wydarzenie musi mieć co najmniej 1 miejsce")
+    @Column(nullable = false)
     private int maxParticipants;
 
-    // Standardowy konstruktor bezargumentowy
-    public Event() {
-    }
+    // Nowe pole dla Soft Delete
+    private boolean deleted = false;
 
-    // Standardowy konstruktor pełny
+    public Event() {}
+
     public Event(Long id, String name, LocalDateTime dateTime, int maxParticipants) {
         this.id = id;
         this.name = name;
@@ -29,36 +32,14 @@ public class Event {
         this.maxParticipants = maxParticipants;
     }
 
-    // Klasyczne Gettery i Settery (zamiast Lomboka)
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
-
-    public int getMaxParticipants() {
-        return maxParticipants;
-    }
-
-    public void setMaxParticipants(int maxParticipants) {
-        this.maxParticipants = maxParticipants;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+    public int getMaxParticipants() { return maxParticipants; }
+    public void setMaxParticipants(int maxParticipants) { this.maxParticipants = maxParticipants; }
+    public boolean isDeleted() { return deleted; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }
