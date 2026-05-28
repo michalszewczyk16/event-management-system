@@ -23,5 +23,18 @@ Trzeci etap wprowadził trwałość danych oraz mechanizmy profesjonalnego zarz�
 - Implementacja mechanizmu "Soft Delete" (miękkie usuwanie) z wykorzystaniem flagi logicznej.
 
 
-Po uruchomieniu aplikacji, dokumentacja Swagger dostępna jest pod adresem:
-http://localhost:8080/swagger-ui/index.html
+Technologie:
+- Java 26
+- Spring Boot 3
+- Spring Data JPA + H2 Database
+- Swagger UI (OpenAPI)
+
+Funkcjonalności:
+- Architektura trójwarstwowa (Controller-Service-Entity/DTO).
+- Walidacja reguł biznesowych z globalną obsługą wyjątków.
+- Trwałość danych (SQL) z mechanizmem Soft Delete.
+- Paginacja i optymalizacja zapytań.
+
+Uruchomienie:
+1. Uruchom aplikację komendą: `mvn spring-boot:run`.
+2. Dokumentacja API dostępna pod adresem: `http://localhost:8080/swagger-ui/index.html`.
